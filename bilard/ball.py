@@ -19,18 +19,25 @@ class BallStripes():
         pygame.draw.circle( screen , self.color , convert_coordinates(self.body.position) , SIZE_BALL , True , False , False , False)
         pygame.draw.line( screen , self.color , convert_coordinates(self.body.position - (SIZE_BALL,0)) , convert_coordinates(self.body.position + (SIZE_BALL,0)))
 
+    def add_to_pymunk_space(self,space):
+        space.add(self.body, self.shape)
+
+    def remove_from_pymunk_space(self, pymunk_space):
+        pymunk_space.remove(self.body, self.shape)
+
+    def add_collision(self,space):
+        space.add_collision_handler(0, self.shape.collision_type).post_solve = self.in_hole
+
     def in_hole(self, arbiter, space, data):
         self.body.position = ( 3 * SIZE_BALL, 2 * (SIZE_BALL + 2) * self.shape.collision_type + SIZE_BALL)
         self.body.velocity = (0,0)
-        
-
-    def add_to_pymunk_space(self,space):
-        space.add(self.body, self.shape)
+        self.remove_from_pymunk_space(space)
 
     def moving(self):
         if self.body.velocity[0] == 0 and self.body.velocity[1] == 0:
             return True
         return False
+
 
 class BallFulls():
     def __init__(self, center, color, collision_type):
@@ -52,12 +59,19 @@ class BallFulls():
     def hit_ball(self, power):
         self.body.apply_force_at_local_point(power)
 
+    def add_to_pymunk_space(self,pymunk_space):
+        pymunk_space.add(self.body, self.shape)
+
+    def remove_from_pymunk_space(self, pymunk_space):
+        pymunk_space.remove(self.body, self.shape)
+
+    def add_collision(self,space):
+        space.add_collision_handler(0, self.shape.collision_type).post_solve = self.in_hole
+
     def in_hole(self, arbiter, space, data):
         self.body.position = ( 3 * SIZE_BALL, 2 * (SIZE_BALL + 2) * self.shape.collision_type + SIZE_BALL)
         self.body.velocity = (0,0)
-
-    def add_to_pymunk_space(self,pymunk_space):
-        pymunk_space.add(self.body, self.shape)
+        self.remove_from_pymunk_space(space)
 
     def moving(self):
         if self.body.velocity[0] == 0 and self.body.velocity[1] == 0:
